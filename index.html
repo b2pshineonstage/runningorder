@@ -190,7 +190,7 @@ function formatMMSS(t){const s=Math.max(0,Math.round(t));const m=Math.floor(s/60
 function formatLong(t){const s=Math.max(0,Math.round(t));const h=Math.floor(s/3600),m=Math.floor((s%3600)/60);return h>0?(h+"h "+String(m).padStart(2,"0")+"m"):(m+"m");}
 function formatClock(t){const s=Math.max(0,Math.round(t));const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;return String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")+":"+String(sec).padStart(2,"0");}
 
-const COLS=["school","routine","type","sharesYesNo","fixedPosition","exactSlot","durationRaw","gapAfterRaw","gapType","notes"];
+const COLS=["school","routine","type","sharesYesNo","fixedPosition","exactSlot","durationRaw","gapAfterRaw","gapType","notes","performers"];
 function rowsToRoutines(rows){
   let r=rows;
   if(r.length && String(r[0][0]||"").trim().toLowerCase()==="school") r=r.slice(1);
@@ -218,10 +218,19 @@ function rowsToRoutines(rows){
 }
 
 /* ---------- overlap rule ---------- */
+function parsePerformers(str){
+  if(!str) return [];
+  return str.split(/,|&/).map(s=>s.trim().toLowerCase()).filter(Boolean);
+}
+function performersOverlap(a,b){
+  const pa=parsePerformers(a.performers), pb=parsePerformers(b.performers);
+  if(!pa.length||!pb.length) return false;
+  return pa.some(n=>pb.includes(n));
+}
 function sharesPerformers(a,b){
   if(a.school!==b.school) return false;
   if(a.type==="Closing segment"||b.type==="Closing segment") return false;
-  if(a.type==="Spotlight"&&b.type==="Spotlight") return false;
+  if(a.type==="Spotlight"&&b.type==="Spotlight") return performersOverlap(a,b);
   if(a.type==="Team"&&b.type==="Team") return a.sharesYesNo!=="No";
   return true;
 }
@@ -474,6 +483,7 @@ function render(){
           <div class="card-meta">
             <span class="pill ${item.type==="Team"?"team":(item.type==="Spotlight"?"spotlight":"")}">${escapeHtml(item.type||"?")}</span>
             <span class="muted">${escapeHtml(item.school)}</span>
+            ${item.performers?`<span class="muted">· ${escapeHtml(item.performers)}</span>`:""}
             <span class="time">${formatClock(t.startSec)}</span>
           </div>
           ${warnArr.map(w=>'<div class="warn-line">⚠ '+escapeHtml(w)+'</div>').join("")}
@@ -580,16 +590,16 @@ function downloadCsv(){
 function csvCell(v){v=String(v==null?"":v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
 
 /* ---------- sample data ---------- */
-const SAMPLE=`School\tRoutine\tType\tShares dancers with other Team routines?\tFixed position\tExact position (slot number)\tDuration (M:SS)\tGap after\tGap after - type\tNotes
-Sparkle Dance Academy\tBig group opener\tTeam\tYes\tOpens the show\t\t3:45\t\t\t
-Sparkle Dance Academy\tFinale group number\tTeam\tYes\t\t\t3:20\t0:30\tGet on / get off\t
-Element Dance Co\tJunior team\tTeam\tNo\t\t\t3:00\t\t\tTwo separate teams, no shared dancers
-Element Dance Co\tSenior team\tTeam\tNo\t\t\t3:10\t\t\t
-Spotlight Stars\tMaya - solo\tSpotlight\t\t\t\t2:00\t0:30\tGet on / get off\t
-Spotlight Stars\tMaya & Jess - duet\tSpotlight\t\tGoes right before the interval\t\t2:15\t\t\t
-Element Dance Co\tSenior solo showcase\tSpotlight\t\tGoes right after the interval\t\t2:30\t\t\t
-Footlights Theatre School\tCrowd-pleaser tap number\tSpotlight\t\tExact position\t4\t2:45\t\t\t
-Whole cast\tFinale and curtain call\tClosing segment\t\t\t\t8:00\t4:00\tCompere\t1 min intro already included in duration`;
+const SAMPLE=`School\tRoutine\tType\tShares dancers with other Team routines?\tFixed position\tExact position (slot number)\tDuration (M:SS)\tGap after\tGap after - type\tNotes\tPerformer(s) (optional)
+Sparkle Dance Academy\tBig group opener\tTeam\tYes\tOpens the show\t\t3:45\t\t\t\t
+Sparkle Dance Academy\tFinale group number\tTeam\tYes\t\t\t3:20\t0:30\tGet on / get off\t\t
+Element Dance Co\tJunior team\tTeam\tNo\t\t\t3:00\t\t\tTwo separate teams, no shared dancers\t
+Element Dance Co\tSenior team\tTeam\tNo\t\t\t3:10\t\t\t\t
+Spotlight Stars\tMaya - solo\tSpotlight\t\t\t\t2:00\t0:30\tGet on / get off\t\tMaya
+Spotlight Stars\tMaya & Jess - duet\tSpotlight\t\tGoes right before the interval\t\t2:15\t\t\t\tMaya, Jess
+Element Dance Co\tSenior solo showcase\tSpotlight\t\tGoes right after the interval\t\t2:30\t\t\t\t
+Footlights Theatre School\tCrowd-pleaser tap number\tSpotlight\t\tExact position\t4\t2:45\t\t\t\t
+Whole cast\tFinale and curtain call\tClosing segment\t\t\t\t8:00\t4:00\tCompere\t1 min intro already included in duration\t`;
 
 /* ---------- wiring ---------- */
 $("loadPasteBtn").onclick=()=>{
