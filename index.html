@@ -8,62 +8,71 @@
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0c0b0a; --panel:#171512; --panel-2:#1f1c17; --border:#352f26;
-  --gold:#d9a94e; --gold-bright:#f0c573; --text:#f2ede2; --dim:#a89e8d;
-  --warn:#e2574c; --warn-bg:rgba(226,87,76,0.14); --spot:#7fb6c0; --interval:#a392c4;
+  --bg:#fbfaf7; --panel:#ffffff; --panel-2:#f7f5f0; --border:#e6e1d6;
+  --gold:#96651a; --gold-fill:#e3b23c; --gold-fill-hover:#d6a02c; --gold-wash:#fbf2dd;
+  --text:#23211d; --dim:#5c5648;
+  --warn:#a3271f; --warn-bg:#fbeaea; --warn-border:#f0c9c5;
+  --spot:#166573; --spot-wash:#e9f4f5;
+  --interval:#5b4f8a; --interval-wash:#efecf8;
 }
 *{box-sizing:border-box;}
-body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
-.wrap{max-width:740px;margin:0 auto;padding:28px 20px 80px;}
-.eyebrow{font-family:'Oswald',sans-serif;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);font-size:12px;font-weight:600;}
-h1{font-family:'Oswald',sans-serif;letter-spacing:0.01em;font-size:28px;font-weight:600;margin:4px 0 18px;color:var(--text);}
-.panel{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin-bottom:16px;}
-label{font-size:12.5px;color:var(--dim);display:block;margin-bottom:5px;}
-input[type=text],input[type=number],textarea{
-  width:100%;background:var(--panel-2);border:1px solid var(--border);color:var(--text);
-  border-radius:7px;padding:8px 10px;font-size:14px;font-family:inherit;
+html{font-size:16px;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;}
+.wrap{max-width:760px;margin:0 auto;padding:32px 22px 90px;}
+.eyebrow{font-family:'Oswald',sans-serif;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);font-size:13px;font-weight:600;}
+h1{font-family:'Oswald',sans-serif;letter-spacing:0.01em;font-size:30px;font-weight:600;margin:4px 0 22px;color:var(--text);}
+h3{margin:0;}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:18px;box-shadow:0 1px 2px rgba(40,30,10,0.04);}
+label{font-size:14px;color:var(--dim);display:block;margin-bottom:6px;font-weight:500;}
+input,textarea{font-family:inherit;box-sizing:border-box;color:var(--text);}
+.field{
+  width:100%;background:var(--panel-2);border:1px solid var(--border);
+  border-radius:8px;padding:11px 13px;font-size:15.5px;
 }
-input:focus,textarea:focus,button:focus-visible{outline:2px solid var(--gold);outline-offset:1px;}
-textarea{min-height:110px;resize:vertical;font-family:ui-monospace,Consolas,monospace;font-size:12.5px;}
-.row{display:flex;gap:14px;flex-wrap:wrap;}
-.row > div{flex:1;min-width:140px;}
+.field:focus,button:focus-visible,.toggle input:focus-visible{outline:2px solid var(--gold-fill-hover);outline-offset:2px;}
+textarea.field{min-height:120px;resize:vertical;font-family:ui-monospace,Consolas,monospace;font-size:13.5px;line-height:1.5;}
+.row{display:flex;gap:16px;flex-wrap:wrap;}
+.row > div{flex:1;min-width:160px;}
 button{
-  font-family:'Oswald',sans-serif;letter-spacing:0.04em;text-transform:uppercase;font-size:12.5px;font-weight:600;
-  background:var(--gold);color:#1a1408;border:none;border-radius:7px;padding:10px 16px;cursor:pointer;
+  font-family:'Oswald',sans-serif;letter-spacing:0.03em;font-size:14px;font-weight:600;
+  background:var(--gold-fill);color:#241c08;border:none;border-radius:8px;padding:12px 20px;
+  cursor:pointer;min-height:44px;transition:background 0.15s ease;
 }
-button.ghost{background:transparent;color:var(--gold);border:1px solid var(--border);}
-button.small{padding:6px 11px;font-size:11px;}
+button:hover{background:var(--gold-fill-hover);}
+button.ghost{background:transparent;color:var(--text);border:1px solid var(--border);}
+button.ghost:hover{background:var(--panel-2);}
 button:disabled{opacity:0.4;cursor:not-allowed;}
-.toggle{display:flex;align-items:center;gap:9px;cursor:pointer;}
-.toggle input{width:auto;}
-.muted{color:var(--dim);font-size:13px;}
-.linklike{background:none;border:none;color:var(--gold);text-decoration:underline;cursor:pointer;font-family:inherit;font-size:13px;text-transform:none;letter-spacing:0;padding:0;}
-.totals{display:flex;gap:22px;align-items:baseline;flex-wrap:wrap;margin-top:6px;}
-.totals .big{font-family:'Oswald',sans-serif;font-size:26px;color:var(--gold-bright);font-weight:600;}
-.totals .sub{font-size:12.5px;color:var(--dim);}
-.issues{background:var(--warn-bg);border:1px solid rgba(226,87,76,0.4);border-radius:10px;padding:14px 18px;margin-bottom:16px;}
-.issues h3{margin:0 0 8px;font-size:13px;color:var(--warn);font-family:'Oswald',sans-serif;letter-spacing:0.04em;text-transform:uppercase;}
-.issues li{font-size:13px;margin-bottom:4px;color:#f1cfca;}
-#orderList{display:flex;flex-direction:column;gap:8px;}
-.card{background:var(--panel);border:1px solid var(--border);border-radius:9px;padding:11px 14px;display:flex;align-items:center;gap:12px;}
-.card.dragging{opacity:0.35;}
-.card.interval{border-style:dashed;border-color:var(--interval);background:rgba(163,146,196,0.08);}
-.card.closing{border-color:var(--gold);background:rgba(217,169,78,0.08);}
-.drag-handle{cursor:grab;color:var(--dim);font-size:16px;line-height:1;touch-action:none;padding:4px;user-select:none;}
-.slot{font-family:'Oswald',sans-serif;color:var(--dim);font-size:13px;min-width:22px;text-align:right;}
+.toggle{display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:500;color:var(--text);font-size:15px;}
+.toggle input{width:18px;height:18px;accent-color:var(--gold-fill-hover);cursor:pointer;}
+.muted{color:var(--dim);font-size:14px;}
+.linklike{background:none;border:none;color:var(--gold);text-decoration:underline;cursor:pointer;font-family:inherit;font-weight:500;font-size:14px;letter-spacing:0;padding:0;min-height:auto;}
+.linklike:hover{background:none;color:var(--gold-fill-hover);}
+.totals{display:flex;gap:26px;align-items:baseline;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
+.totals .big{font-family:'Oswald',sans-serif;font-size:28px;color:var(--gold);font-weight:600;}
+.totals .sub{font-size:13px;color:var(--dim);margin-top:2px;}
+.issues{background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:12px;padding:16px 20px;margin-bottom:18px;}
+.issues h3{margin:0 0 9px;font-size:13.5px;color:var(--warn);font-family:'Oswald',sans-serif;letter-spacing:0.04em;text-transform:uppercase;}
+.issues li{font-size:14.5px;margin-bottom:5px;color:#6e1f19;line-height:1.45;}
+#orderList{display:flex;flex-direction:column;gap:10px;}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:13px 16px;display:flex;align-items:center;gap:14px;box-shadow:0 1px 2px rgba(40,30,10,0.03);}
+.card.dragging{opacity:0.4;}
+.card.interval{border-color:var(--interval);background:var(--interval-wash);}
+.card.closing{border-color:var(--gold);background:var(--gold-wash);}
+.drag-handle{cursor:grab;color:var(--dim);font-size:18px;line-height:1;touch-action:none;padding:6px 4px;user-select:none;}
+.slot{font-family:'Oswald',sans-serif;color:var(--dim);font-size:14.5px;min-width:24px;text-align:right;}
 .card-main{flex:1;min-width:0;}
-.card-title{font-size:14.5px;font-weight:600;}
-.card-meta{display:flex;gap:8px;align-items:center;margin-top:3px;flex-wrap:wrap;}
-.pill{font-size:10.5px;text-transform:uppercase;letter-spacing:0.05em;padding:2px 7px;border-radius:20px;border:1px solid var(--border);color:var(--dim);}
-.pill.team{border-color:var(--gold);color:var(--gold);}
-.pill.spotlight{border-color:var(--spot);color:var(--spot);}
-.time{font-size:12.5px;color:var(--dim);font-family:ui-monospace,monospace;white-space:nowrap;}
-.dur{font-size:13px;color:var(--text);font-family:ui-monospace,monospace;white-space:nowrap;}
-.warn-line{font-size:12px;color:var(--warn);margin-top:5px;}
-.interval-input{width:64px;background:var(--panel-2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px 7px;font-size:13px;text-align:center;}
-.drop-placeholder{height:3px;background:var(--gold);border-radius:2px;margin:2px 0;}
-.empty{padding:34px 14px;text-align:center;color:var(--dim);font-size:14px;}
-.actions{display:flex;gap:10px;margin-top:18px;}
+.card-title{font-size:16px;font-weight:600;}
+.card-meta{display:flex;gap:9px;align-items:center;margin-top:5px;flex-wrap:wrap;}
+.pill{font-size:11px;text-transform:uppercase;letter-spacing:0.04em;padding:3px 9px;border-radius:20px;border:1px solid var(--border);color:var(--dim);font-weight:600;}
+.pill.team{border-color:var(--gold);color:var(--gold);background:var(--gold-wash);}
+.pill.spotlight{border-color:var(--spot);color:var(--spot);background:var(--spot-wash);}
+.time{font-size:13px;color:var(--dim);font-family:ui-monospace,monospace;white-space:nowrap;}
+.dur{font-size:14.5px;color:var(--text);font-family:ui-monospace,monospace;white-space:nowrap;font-weight:500;}
+.warn-line{font-size:13.5px;color:var(--warn);margin-top:6px;line-height:1.4;}
+.interval-input{width:62px;flex:0 0 auto;background:var(--panel);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:8px 6px;font-size:14.5px;text-align:center;}
+.drop-placeholder{height:4px;background:var(--gold-fill);border-radius:3px;margin:3px 0;}
+.empty{padding:40px 16px;text-align:center;color:var(--dim);font-size:15px;}
+.actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;}
 #printTable{display:none;}
 @media print{
   body *{visibility:hidden;}
@@ -74,9 +83,9 @@ button:disabled{opacity:0.4;cursor:not-allowed;}
   #printTable h2{font-family:Arial,sans-serif;}
 }
 @media (max-width:480px){
-  h1{font-size:22px;}
-  .totals .big{font-size:21px;}
-  .card{padding:9px 10px;gap:8px;}
+  h1{font-size:24px;}
+  .totals .big{font-size:22px;}
+  .card{padding:11px 12px;gap:10px;}
 }
 </style>
 </head>
@@ -89,20 +98,24 @@ button:disabled{opacity:0.4;cursor:not-allowed;}
     <div class="row">
       <div>
         <label for="showName">Show name</label>
-        <input type="text" id="showName" placeholder="e.g. Albany Theatre - Summer Showcase">
+        <input class="field" type="text" id="showName" placeholder="e.g. Albany Theatre - Summer Showcase">
       </div>
     </div>
-    <div class="row" style="margin-top:12px;">
-      <div>
+    <div class="row" style="margin-top:16px;">
+      <div style="flex:0 0 auto;min-width:170px;">
         <label class="toggle"><input type="checkbox" id="hasInterval"> Has an interval</label>
       </div>
       <div>
-        <label for="intervalMin">Interval length (minutes)</label>
-        <input type="number" id="intervalMin" value="15" min="1" max="60">
+        <label for="intervalMin">Interval length (min)</label>
+        <input class="field" type="number" id="intervalMin" value="15" min="1" max="60">
       </div>
       <div>
-        <label for="minChangeMin">Minimum change time (minutes)</label>
-        <input type="number" id="minChangeMin" value="5" min="1" max="20">
+        <label for="minChangeMin">Min. change time (min)</label>
+        <input class="field" type="number" id="minChangeMin" value="5" min="1" max="20">
+      </div>
+      <div>
+        <label for="minRoutinesBetween">Min. routines between same school</label>
+        <input class="field" type="number" id="minRoutinesBetween" value="3" min="0" max="10">
       </div>
     </div>
     <div class="totals" id="totalsBlock" style="display:none;"></div>
@@ -110,14 +123,14 @@ button:disabled{opacity:0.4;cursor:not-allowed;}
 
   <div class="panel" id="dataPanel">
     <label for="pasteArea">Paste your routines from the Routines tab (with or without the header row)</label>
-    <textarea id="pasteArea" placeholder="Copy the rows from your Google Sheet and paste here..."></textarea>
+    <textarea class="field" id="pasteArea" placeholder="Copy the rows from your Google Sheet and paste here..."></textarea>
     <div class="actions">
       <button id="loadPasteBtn">Build running order</button>
       <button class="ghost" id="loadSampleBtn">Try it with sample data</button>
     </div>
   </div>
 
-  <div class="muted" id="dataSummary" style="display:none;margin-bottom:14px;">
+  <div class="muted" id="dataSummary" style="display:none;margin-bottom:16px;">
     <span id="dataSummaryText"></span> &nbsp;·&nbsp;
     <button class="linklike" id="loadDifferentBtn">Load different data</button> &nbsp;·&nbsp;
     <button class="linklike" id="rearrangeBtn">Re-run auto-arrange</button>
@@ -234,7 +247,7 @@ function routineSequenceNumbers(order){
   return map;
 }
 function countRoutineSlots(order){return order.filter(i=>i.kind!=="interval"&&i.type!=="Closing segment").length;}
-function computeWarnings(order,minChangeSec){
+function computeWarnings(order,minChangeSec,minRoutinesBetween){
   const timeline=computeTimeline(order);
   const seqNum=routineSequenceNumbers(order);
   const totalSlots=countRoutineSlots(order);
@@ -243,33 +256,51 @@ function computeWarnings(order,minChangeSec){
   const warnings={};
   const add=(id,msg)=>{(warnings[id]=warnings[id]||[]).push(msg);};
   const routines=order.filter(o=>o.kind!=="interval");
+  const intervalIdx=order.findIndex(o=>o.kind==="interval");
+
   for(let i=0;i<routines.length;i++){
     for(let j=i+1;j<routines.length;j++){
       const a=routines[i],b=routines[j];
       if(!sharesPerformers(a,b)) continue;
       const ta=byId[a.id],tb=byId[b.id];
       const gap=ta.startSec<=tb.startSec?tb.startSec-ta.endSec:ta.startSec-tb.endSec;
+      const [earlier,later]=ta.startSec<=tb.startSec?[a,b]:[b,a];
+
       if(gap<minChangeSec){
-        const [earlier,later]=ta.startSec<=tb.startSec?[a,b]:[b,a];
         add(later.id,`Only ${formatMMSS(Math.max(0,gap))} after "${earlier.routine}" - same dancers, needs ~${formatMMSS(minChangeSec)}`);
+      }
+
+      // separate "acts apart" safety margin - same school shouldn't queue back up too
+      // soon even when the clock technically allows it, unless an interval sits between them
+      if(minRoutinesBetween>0){
+        const idxA=order.indexOf(a), idxB=order.indexOf(b);
+        const lo=Math.min(idxA,idxB), hi=Math.max(idxA,idxB);
+        const hasIntervalBetween=intervalIdx>lo && intervalIdx<hi;
+        if(!hasIntervalBetween){
+          const between=order.slice(lo+1,hi).filter(o=>o.kind!=="interval").length;
+          if(between<minRoutinesBetween){
+            add(later.id,`Only ${between} other routine${between===1?"":"s"} since "${earlier.routine}" (same dancers) - usually want at least ${minRoutinesBetween}`);
+          }
+        }
       }
     }
   }
+
   routines.forEach((r,idx)=>{
     if(r.fixedPosition==="Opens the show" && idx!==0) add(r.id,"Flagged to open the show, but isn't first");
     if(r.fixedPosition==="Closes the show" && seqNum[r.id]!==totalSlots) add(r.id,"Flagged to close the show, but isn't the last routine");
     if(r.fixedPosition==="Exact position" && r.exactSlot && seqNum[r.id]!==parseInt(r.exactSlot,10)) add(r.id,`Flagged for position ${r.exactSlot}, currently at ${seqNum[r.id]}`);
   });
-  const intervalIdx=order.findIndex(o=>o.kind==="interval");
   routines.forEach(r=>{
     const idx=order.indexOf(r);
     if(r.fixedPosition==="Goes right before the interval" && (intervalIdx===-1||idx!==intervalIdx-1)) add(r.id,"Flagged to go right before the interval, but isn't adjacent to it");
     if(r.fixedPosition==="Goes right after the interval" && (intervalIdx===-1||idx!==intervalIdx+1)) add(r.id,"Flagged to go right after the interval, but isn't adjacent to it");
   });
+
   return {warnings,timeline,seqNum};
 }
-function violationPenalty(order,minChangeSec){
-  return Object.values(computeWarnings(order,minChangeSec).warnings).reduce((s,a)=>s+a.length,0);
+function violationPenalty(order,minChangeSec,minRoutinesBetween){
+  return Object.values(computeWarnings(order,minChangeSec,minRoutinesBetween).warnings).reduce((s,a)=>s+a.length,0);
 }
 function mulberry32(seed){
   return function(){seed|=0;seed=(seed+0x6D2B79F5)|0;let t=Math.imul(seed^(seed>>>15),1|seed);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296;};
@@ -292,13 +323,13 @@ function autoArrange(routines,settings){
   active=active.filter(r=>r!==openItem&&r!==closeItem);
   let best=active.slice();
   const withEnds=arr=>[openItem,...arr,closeItem].filter(Boolean);
-  let bestPenalty=violationPenalty(withEnds(best),settings.minChangeSec);
+  let bestPenalty=violationPenalty(withEnds(best),settings.minChangeSec,settings.minRoutinesBetween);
   let rng=mulberry32(42);
   for(let iter=0;iter<3000&&bestPenalty>0;iter++){
     const a=Math.floor(rng()*best.length),b=Math.floor(rng()*best.length);
     if(a===b) continue;
     const cand=best.slice();[cand[a],cand[b]]=[cand[b],cand[a]];
-    const p=violationPenalty(withEnds(cand),settings.minChangeSec);
+    const p=violationPenalty(withEnds(cand),settings.minChangeSec,settings.minRoutinesBetween);
     if(p<=bestPenalty){best=cand;bestPenalty=p;}
   }
   let order=withEnds(best);
@@ -323,12 +354,12 @@ function autoArrange(routines,settings){
     const pinned=new Set([openItem,closeItem,beforeItem,afterItem].filter(Boolean).map(r=>r.id));
     const movable=[];
     order.forEach((it,idx)=>{if(it.kind!=="interval"&&!pinned.has(it.id)) movable.push(idx);});
-    let refined=order.slice(),refPenalty=violationPenalty(refined,settings.minChangeSec);
+    let refined=order.slice(),refPenalty=violationPenalty(refined,settings.minChangeSec,settings.minRoutinesBetween);
     for(let iter=0;iter<3000&&refPenalty>0&&movable.length>1;iter++){
       const a=movable[Math.floor(rng()*movable.length)],b=movable[Math.floor(rng()*movable.length)];
       if(a===b) continue;
       const cand=refined.slice();[cand[a],cand[b]]=[cand[b],cand[a]];
-      const p=violationPenalty(cand,settings.minChangeSec);
+      const p=violationPenalty(cand,settings.minChangeSec,settings.minRoutinesBetween);
       if(p<=refPenalty){refined=cand;refPenalty=p;}
     }
     order=refined;
@@ -345,6 +376,7 @@ function settings(){
     hasInterval:$("hasInterval").checked,
     intervalSec:Math.max(1,parseInt($("intervalMin").value||"15",10))*60,
     minChangeSec:Math.max(1,parseInt($("minChangeMin").value||"5",10))*60,
+    minRoutinesBetween:Math.max(0,parseInt($("minRoutinesBetween").value||"0",10)),
   };
 }
 
@@ -389,10 +421,9 @@ function render(){
     $("exportActions").style.display="none";
     return;
   }
-  const {warnings,timeline,seqNum}=computeWarnings(state.order,s.minChangeSec);
+  const {warnings,timeline,seqNum}=computeWarnings(state.order,s.minChangeSec,s.minRoutinesBetween);
   const totalSlots=countRoutineSlots(state.order);
 
-  // issues
   if(state.issues.length){
     $("issuesPanel").style.display="block";
     $("issuesList").innerHTML=state.issues.map(m=>"<li>"+escapeHtml(m)+"</li>").join("");
@@ -400,7 +431,6 @@ function render(){
     $("issuesPanel").style.display="none";
   }
 
-  // totals
   const last=timeline[timeline.length-1];
   const totalSec=last?last.nextStartSec:0;
   let actSplit="";
@@ -409,14 +439,13 @@ function render(){
     const act1End=timeline[ivIdx-1]?timeline[ivIdx-1].nextStartSec:0;
     const act2Start=timeline[ivIdx].nextStartSec;
     const act2Dur=totalSec-act2Start;
-    actSplit=`<div><div class="big" style="font-size:16px;">${formatLong(act1End)}</div><div class="sub">Act 1</div></div>`+
-             `<div><div class="big" style="font-size:16px;color:var(--interval);">${formatLong(s.intervalSec)}</div><div class="sub">Interval</div></div>`+
-             `<div><div class="big" style="font-size:16px;">${formatLong(act2Dur)}</div><div class="sub">Act 2</div></div>`;
+    actSplit=`<div><div class="big" style="font-size:18px;">${formatLong(act1End)}</div><div class="sub">Act 1</div></div>`+
+             `<div><div class="big" style="font-size:18px;color:var(--interval);">${formatLong(s.intervalSec)}</div><div class="sub">Interval</div></div>`+
+             `<div><div class="big" style="font-size:18px;">${formatLong(act2Dur)}</div><div class="sub">Act 2</div></div>`;
   }
   $("totalsBlock").style.display="flex";
   $("totalsBlock").innerHTML=`<div><div class="big">${formatLong(totalSec)}</div><div class="sub">Total show length</div></div>`+actSplit;
 
-  // cards
   const ordEl=$("orderList");
   state.order.forEach(item=>{
     const t=timeline.find(x=>x.item===item);
@@ -454,7 +483,6 @@ function render(){
     ordEl.appendChild(card);
   });
 
-  // wire interval duration input
   const ivInput=ordEl.querySelector("[data-interval-min]");
   if(ivInput){
     ivInput.addEventListener("change",()=>{
@@ -518,7 +546,6 @@ function wireDragHandles(){
 
 /* ---------- export ---------- */
 function preparePrint(){
-  const s=settings();
   const timeline=computeTimeline(state.order);
   const showName=$("showName").value||"Running order";
   let rows=state.order.map((item,idx)=>{
@@ -588,6 +615,7 @@ $("intervalMin").onchange=()=>{
   if(idx!==-1){state.order[idx].durationSec=Math.max(1,parseInt($("intervalMin").value||"15",10))*60;render();}
 };
 $("minChangeMin").onchange=render;
+$("minRoutinesBetween").onchange=render;
 $("printBtn").onclick=()=>{preparePrint();window.print();};
 $("csvBtn").onclick=downloadCsv;
 
