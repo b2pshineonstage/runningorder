@@ -19,7 +19,7 @@
 html{font-size:16px;}
 body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;}
 .wrap{max-width:760px;margin:0 auto;padding:32px 22px 90px;}
-.eyebrow{font-family:'Oswald',sans-serif;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);font-size:13px;font-weight:600;}
+.logo{height:64px;width:auto;display:block;margin-bottom:16px;}
 h1{font-family:'Oswald',sans-serif;letter-spacing:0.01em;font-size:30px;font-weight:600;margin:4px 0 22px;color:var(--text);}
 h3{margin:0;}
 .panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:18px;box-shadow:0 1px 2px rgba(40,30,10,0.04);}
@@ -58,6 +58,9 @@ button:disabled{opacity:0.4;cursor:not-allowed;}
 .card.dragging{opacity:0.4;}
 .card.interval{border-color:var(--interval);background:var(--interval-wash);}
 .card.closing{border-color:var(--gold);background:var(--gold-wash);}
+.card.compere{border-style:dashed;background:transparent;padding-top:10px;padding-bottom:10px;}
+.card.compere .card-title{font-size:14px;font-weight:500;color:var(--dim);}
+.card.compere .dur{color:var(--dim);}
 .drag-handle{cursor:grab;color:var(--dim);font-size:18px;line-height:1;touch-action:none;padding:6px 4px;user-select:none;}
 .slot{font-family:'Oswald',sans-serif;color:var(--dim);font-size:14.5px;min-width:24px;text-align:right;}
 .card-main{flex:1;min-width:0;}
@@ -91,7 +94,7 @@ button:disabled{opacity:0.4;cursor:not-allowed;}
 </head>
 <body>
 <div class="wrap">
-  <div class="eyebrow">Shine on Stage</div>
+  <img class="logo" src="logo.png" alt="Shine on Stage">
   <h1>Running order builder</h1>
 
   <div class="panel">
@@ -99,6 +102,10 @@ button:disabled{opacity:0.4;cursor:not-allowed;}
       <div>
         <label for="showName">Show name</label>
         <input class="field" type="text" id="showName" placeholder="e.g. Albany Theatre - Summer Showcase">
+      </div>
+      <div style="flex:0 0 auto;min-width:140px;">
+        <label for="showStartTime">Show start time <span class="muted" style="font-weight:400;">(optional)</span></label>
+        <input class="field" type="time" id="showStartTime">
       </div>
     </div>
     <div class="row" style="margin-top:16px;">
@@ -113,15 +120,56 @@ button:disabled{opacity:0.4;cursor:not-allowed;}
         <label for="minChangeMin">Min. change time (min)</label>
         <input class="field" type="number" id="minChangeMin" value="5" min="1" max="20">
       </div>
-      <div>
-        <label for="minRoutinesBetween">Min. routines between same school</label>
-        <input class="field" type="number" id="minRoutinesBetween" value="3" min="0" max="10">
+    </div>
+
+    <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border);">
+      <label style="margin-bottom:10px;">Compere times <span class="muted" style="font-weight:400;">- applied automatically between acts unless a routine has its own Gap after set</span></label>
+      <div class="row">
+        <div>
+          <label for="welcomeTime">Welcome / introduction</label>
+          <input class="field" type="text" id="welcomeTime" value="3:00" placeholder="M:SS">
+        </div>
+        <div>
+          <label for="actIntroTime">Intro before each act</label>
+          <input class="field" type="text" id="actIntroTime" value="0:30" placeholder="M:SS">
+        </div>
+        <div>
+          <label for="finaleIntroTime">Intro before finale</label>
+          <input class="field" type="text" id="finaleIntroTime" value="0:30" placeholder="M:SS">
+        </div>
+        <div>
+          <label for="postShowTime">Post-show announcements</label>
+          <input class="field" type="text" id="postShowTime" value="6:00" placeholder="M:SS">
+        </div>
       </div>
     </div>
+
     <div class="totals" id="totalsBlock" style="display:none;"></div>
   </div>
 
   <div class="panel" id="dataPanel">
+    <label for="sheetUrlInput">Load directly from a published Google Sheet</label>
+    <div class="row" style="align-items:flex-start;">
+      <div style="flex:3;min-width:220px;">
+        <input class="field" type="text" id="sheetUrlInput" placeholder="Paste the published CSV link here">
+      </div>
+      <div style="flex:0 0 auto;">
+        <button id="loadSheetBtn">Load from Sheet</button>
+      </div>
+    </div>
+    <div class="muted" id="sheetStatus" style="margin-top:8px;"></div>
+    <div class="muted" style="margin-top:8px;line-height:1.5;">
+      In the Sheet: <strong>File → Share → Publish to web</strong> → choose the <strong>Routines</strong> tab and
+      <strong>Comma-separated values (.csv)</strong> → tick "Automatically republish when changes are made" → Publish.
+      Paste the link it gives you above. Anyone with that link can view the data (read-only).
+    </div>
+
+    <div style="display:flex;align-items:center;gap:14px;margin:20px 0;">
+      <div style="flex:1;height:1px;background:var(--border);"></div>
+      <span class="muted" style="font-size:13px;">or paste data directly</span>
+      <div style="flex:1;height:1px;background:var(--border);"></div>
+    </div>
+
     <label for="pasteArea">Paste your routines from the Routines tab (with or without the header row)</label>
     <textarea class="field" id="pasteArea" placeholder="Copy the rows from your Google Sheet and paste here..."></textarea>
     <div class="actions">
@@ -134,6 +182,7 @@ button:disabled{opacity:0.4;cursor:not-allowed;}
     <span id="dataSummaryText"></span> &nbsp;·&nbsp;
     <button class="linklike" id="loadDifferentBtn">Load different data</button> &nbsp;·&nbsp;
     <button class="linklike" id="rearrangeBtn">Re-run auto-arrange</button>
+    <span id="refreshSheetWrap" style="display:none;"> &nbsp;·&nbsp; <button class="linklike" id="refreshSheetBtn">Refresh from Sheet</button></span>
   </div>
 
   <div class="issues" id="issuesPanel" style="display:none;">
@@ -189,6 +238,16 @@ function parseDuration(str){
 function formatMMSS(t){const s=Math.max(0,Math.round(t));const m=Math.floor(s/60),sec=s%60;return m+":"+String(sec).padStart(2,"0");}
 function formatLong(t){const s=Math.max(0,Math.round(t));const h=Math.floor(s/3600),m=Math.floor((s%3600)/60);return h>0?(h+"h "+String(m).padStart(2,"0")+"m"):(m+"m");}
 function formatClock(t){const s=Math.max(0,Math.round(t));const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;return String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")+":"+String(sec).padStart(2,"0");}
+function parseClockTimeToSec(str){
+  if(!str) return null;
+  const m=String(str).trim().match(/^(\d{1,2}):(\d{2})$/);
+  if(!m) return null;
+  return parseInt(m[1],10)*3600+parseInt(m[2],10)*60;
+}
+function displayClock(elapsedSec,showStartSec){
+  if(showStartSec!=null) return formatClock(((elapsedSec+showStartSec)%86400+86400)%86400);
+  return formatClock(elapsedSec);
+}
 
 const COLS=["school","routine","type","sharesYesNo","fixedPosition","exactSlot","durationRaw","gapAfterRaw","gapType","notes","performers"];
 function rowsToRoutines(rows){
@@ -237,15 +296,36 @@ function sharesPerformers(a,b){
 
 /* ---------- timeline / warnings ---------- */
 function getId(item){return item.kind==="interval"?"interval":item.id;}
-function computeTimeline(order,startAt){
+function computeTimeline(order,settings,startAt){
   let t=startAt||0;
-  return order.map(item=>{
+  const results=[];
+  order.forEach((item,idx)=>{
+    if(idx===0) t+=(settings.welcomeSec||0)+(settings.actIntroSec||0);
     const dur=item.kind==="interval"?item.durationSec:(item.durationSec||0);
-    const gap=item.kind==="interval"?0:(item.gapAfterSec||0);
     const startSec=t,endSec=t+dur;
+
+    const nextItem=order[idx+1];
+    const hasExplicitGap=item.kind!=="interval" && item.gapAfterRaw && item.gapAfterRaw.trim()!=="";
+    let gap;
+    if(item.kind==="interval"){
+      // interval's own trailing gap before the next act stays a deliberate default - no per-row override exists for it
+      gap=nextItem?(nextItem.type==="Closing segment"?settings.finaleIntroSec:settings.actIntroSec):(settings.postShowSec||0);
+    } else if(hasExplicitGap){
+      gap=item.gapAfterSec||0;
+    } else if(!nextItem){
+      gap=settings.postShowSec||0;
+    } else if(nextItem.kind==="interval"){
+      gap=0;
+    } else if(nextItem.type==="Closing segment"){
+      gap=settings.finaleIntroSec||0;
+    } else {
+      gap=settings.actIntroSec||0;
+    }
+
     t=endSec+gap;
-    return {item,startSec,endSec,nextStartSec:t};
+    results.push({item,startSec,endSec,nextStartSec:t});
   });
+  return results;
 }
 function routineSequenceNumbers(order){
   const map={};let n=0;
@@ -256,8 +336,9 @@ function routineSequenceNumbers(order){
   return map;
 }
 function countRoutineSlots(order){return order.filter(i=>i.kind!=="interval"&&i.type!=="Closing segment").length;}
-function computeWarnings(order,minChangeSec,minRoutinesBetween){
-  const timeline=computeTimeline(order);
+function computeWarnings(order,settings){
+  const minChangeSec=settings.minChangeSec, minRoutinesBetween=settings.minRoutinesBetween;
+  const timeline=computeTimeline(order,settings);
   const seqNum=routineSequenceNumbers(order);
   const totalSlots=countRoutineSlots(order);
   const byId={};
@@ -275,22 +356,18 @@ function computeWarnings(order,minChangeSec,minRoutinesBetween){
       const gap=ta.startSec<=tb.startSec?tb.startSec-ta.endSec:ta.startSec-tb.endSec;
       const [earlier,later]=ta.startSec<=tb.startSec?[a,b]:[b,a];
 
-      if(gap<minChangeSec){
-        add(later.id,`Only ${formatMMSS(Math.max(0,gap))} after "${earlier.routine}" - same dancers, needs ~${formatMMSS(minChangeSec)}`);
-      }
+      // either signal being good enough is treated as fine - only flag when
+      // BOTH the clock gap and the routine-count buffer are genuinely too tight
+      const idxA=order.indexOf(a), idxB=order.indexOf(b);
+      const lo=Math.min(idxA,idxB), hi=Math.max(idxA,idxB);
+      const hasIntervalBetween=intervalIdx>lo && intervalIdx<hi;
+      const between=order.slice(lo+1,hi).filter(o=>o.kind!=="interval").length;
 
-      // separate "acts apart" safety margin - same school shouldn't queue back up too
-      // soon even when the clock technically allows it, unless an interval sits between them
-      if(minRoutinesBetween>0){
-        const idxA=order.indexOf(a), idxB=order.indexOf(b);
-        const lo=Math.min(idxA,idxB), hi=Math.max(idxA,idxB);
-        const hasIntervalBetween=intervalIdx>lo && intervalIdx<hi;
-        if(!hasIntervalBetween){
-          const between=order.slice(lo+1,hi).filter(o=>o.kind!=="interval").length;
-          if(between<minRoutinesBetween){
-            add(later.id,`Only ${between} other routine${between===1?"":"s"} since "${earlier.routine}" (same dancers) - usually want at least ${minRoutinesBetween}`);
-          }
-        }
+      const timeOk=gap>=minChangeSec;
+      const countOk=hasIntervalBetween || minRoutinesBetween<=0 || between>=minRoutinesBetween;
+
+      if(!timeOk && !countOk){
+        add(later.id,`Only ${formatMMSS(Math.max(0,gap))} and ${between} other routine${between===1?"":"s"} since "${earlier.routine}" (same dancers) - usually want ~${formatMMSS(minChangeSec)} or ${minRoutinesBetween}+ routines between`);
       }
     }
   }
@@ -308,8 +385,8 @@ function computeWarnings(order,minChangeSec,minRoutinesBetween){
 
   return {warnings,timeline,seqNum};
 }
-function violationPenalty(order,minChangeSec,minRoutinesBetween){
-  return Object.values(computeWarnings(order,minChangeSec,minRoutinesBetween).warnings).reduce((s,a)=>s+a.length,0);
+function violationPenalty(order,settings){
+  return Object.values(computeWarnings(order,settings).warnings).reduce((s,a)=>s+a.length,0);
 }
 function mulberry32(seed){
   return function(){seed|=0;seed=(seed+0x6D2B79F5)|0;let t=Math.imul(seed^(seed>>>15),1|seed);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296;};
@@ -332,13 +409,13 @@ function autoArrange(routines,settings){
   active=active.filter(r=>r!==openItem&&r!==closeItem);
   let best=active.slice();
   const withEnds=arr=>[openItem,...arr,closeItem].filter(Boolean);
-  let bestPenalty=violationPenalty(withEnds(best),settings.minChangeSec,settings.minRoutinesBetween);
+  let bestPenalty=violationPenalty(withEnds(best),settings);
   let rng=mulberry32(42);
   for(let iter=0;iter<3000&&bestPenalty>0;iter++){
     const a=Math.floor(rng()*best.length),b=Math.floor(rng()*best.length);
     if(a===b) continue;
     const cand=best.slice();[cand[a],cand[b]]=[cand[b],cand[a]];
-    const p=violationPenalty(withEnds(cand),settings.minChangeSec,settings.minRoutinesBetween);
+    const p=violationPenalty(withEnds(cand),settings);
     if(p<=bestPenalty){best=cand;bestPenalty=p;}
   }
   let order=withEnds(best);
@@ -363,12 +440,12 @@ function autoArrange(routines,settings){
     const pinned=new Set([openItem,closeItem,beforeItem,afterItem].filter(Boolean).map(r=>r.id));
     const movable=[];
     order.forEach((it,idx)=>{if(it.kind!=="interval"&&!pinned.has(it.id)) movable.push(idx);});
-    let refined=order.slice(),refPenalty=violationPenalty(refined,settings.minChangeSec,settings.minRoutinesBetween);
+    let refined=order.slice(),refPenalty=violationPenalty(refined,settings);
     for(let iter=0;iter<3000&&refPenalty>0&&movable.length>1;iter++){
       const a=movable[Math.floor(rng()*movable.length)],b=movable[Math.floor(rng()*movable.length)];
       if(a===b) continue;
       const cand=refined.slice();[cand[a],cand[b]]=[cand[b],cand[a]];
-      const p=violationPenalty(cand,settings.minChangeSec,settings.minRoutinesBetween);
+      const p=violationPenalty(cand,settings);
       if(p<=refPenalty){refined=cand;refPenalty=p;}
     }
     order=refined;
@@ -377,7 +454,7 @@ function autoArrange(routines,settings){
 }
 
 /* ---------- state & UI ---------- */
-const state={routines:[],order:[],issues:[]};
+const state={routines:[],order:[],issues:[],sheetUrl:null};
 const $=id=>document.getElementById(id);
 
 function settings(){
@@ -385,7 +462,15 @@ function settings(){
     hasInterval:$("hasInterval").checked,
     intervalSec:Math.max(1,parseInt($("intervalMin").value||"15",10))*60,
     minChangeSec:Math.max(1,parseInt($("minChangeMin").value||"5",10))*60,
-    minRoutinesBetween:Math.max(0,parseInt($("minRoutinesBetween").value||"0",10)),
+    // not user-editable - a quiet backstop alongside the clock check, so a long single
+    // routine can satisfy "is this changeover genuinely tight?" on time alone without
+    // also needing a minimum number of other acts in between
+    minRoutinesBetween:3,
+    welcomeSec:parseDuration($("welcomeTime").value)??180,
+    actIntroSec:parseDuration($("actIntroTime").value)??30,
+    finaleIntroSec:parseDuration($("finaleIntroTime").value)??30,
+    postShowSec:parseDuration($("postShowTime").value)??360,
+    showStartSec:parseClockTimeToSec($("showStartTime").value),
   };
 }
 
@@ -400,8 +485,45 @@ function loadRoutines(rows){
   }
   $("dataPanel").style.display="none";
   $("dataSummary").style.display="block";
-  $("dataSummaryText").textContent=routines.length+" routine"+(routines.length===1?"":"s")+" loaded";
+  $("refreshSheetWrap").style.display=state.sheetUrl?"inline":"none";
+  const sourceNote=state.sheetUrl?" (from Google Sheet)":"";
+  $("dataSummaryText").textContent=routines.length+" routine"+(routines.length===1?"":"s")+" loaded"+sourceNote;
   render();
+}
+
+function setSheetStatus(msg,isError){
+  const el=$("sheetStatus");
+  el.textContent=msg||"";
+  el.style.color=isError?"var(--warn)":"var(--dim)";
+}
+
+async function loadFromSheet(url){
+  if(!url||!url.trim()){
+    setSheetStatus("Paste a published Sheet link first.",true);
+    return;
+  }
+  url=url.trim();
+  setSheetStatus("Loading…",false);
+  try{
+    const res=await fetch(url,{cache:"no-store"});
+    if(!res.ok) throw new Error("status "+res.status);
+    const text=await res.text();
+    if(/^\s*<(!doctype|html)/i.test(text)){
+      setSheetStatus('That link returned a web page, not CSV data - double check it\'s the "Publish to web" link with CSV chosen, not the normal share/edit link.',true);
+      return;
+    }
+    const rows=parseDelimited(text);
+    if(!rows.length){
+      setSheetStatus("That link loaded but had no rows in it - check the right tab was chosen when publishing.",true);
+      return;
+    }
+    state.sheetUrl=url;
+    try{ localStorage.setItem("sos_sheet_url",url); }catch(e){}
+    loadRoutines(rows);
+    setSheetStatus("Loaded from Google Sheet just now.",false);
+  }catch(err){
+    setSheetStatus("Couldn't load that link. Check it's published as CSV (File → Share → Publish to web) and that you copied the whole link.",true);
+  }
 }
 
 function applyIntervalChange(){
@@ -430,7 +552,7 @@ function render(){
     $("exportActions").style.display="none";
     return;
   }
-  const {warnings,timeline,seqNum}=computeWarnings(state.order,s.minChangeSec,s.minRoutinesBetween);
+  const {warnings,timeline,seqNum}=computeWarnings(state.order,s);
   const totalSlots=countRoutineSlots(state.order);
 
   if(state.issues.length){
@@ -456,6 +578,20 @@ function render(){
   $("totalsBlock").innerHTML=`<div><div class="big">${formatLong(totalSec)}</div><div class="sub">Total show length</div></div>`+actSplit;
 
   const ordEl=$("orderList");
+
+  if(timeline.length){
+    const welcomeCard=document.createElement("div");
+    welcomeCard.className="card compere";
+    welcomeCard.innerHTML=`
+      <span class="slot">—</span>
+      <div class="card-main">
+        <div class="card-title">Welcome &amp; intro to act 1</div>
+        <div class="card-meta"><span class="time">${displayClock(0,s.showStartSec)}</span></div>
+      </div>
+      <span class="dur">${formatMMSS(timeline[0].startSec)}</span>`;
+    ordEl.appendChild(welcomeCard);
+  }
+
   state.order.forEach(item=>{
     const t=timeline.find(x=>x.item===item);
     const id=getId(item);
@@ -468,7 +604,7 @@ function render(){
         <span class="slot">—</span>
         <div class="card-main">
           <div class="card-title">Interval</div>
-          <div class="card-meta"><span class="time">${formatClock(t.startSec)}</span></div>
+          <div class="card-meta"><span class="time">${displayClock(t.startSec,s.showStartSec)}</span></div>
         </div>
         <input class="interval-input" type="number" min="1" max="60" value="${Math.round(item.durationSec/60)}" data-interval-min>
         <span class="muted">min</span>`;
@@ -484,7 +620,7 @@ function render(){
             <span class="pill ${item.type==="Team"?"team":(item.type==="Spotlight"?"spotlight":"")}">${escapeHtml(item.type||"?")}</span>
             <span class="muted">${escapeHtml(item.school)}</span>
             ${item.performers?`<span class="muted">· ${escapeHtml(item.performers)}</span>`:""}
-            <span class="time">${formatClock(t.startSec)}</span>
+            <span class="time">${displayClock(t.startSec,s.showStartSec)}</span>
           </div>
           ${warnArr.map(w=>'<div class="warn-line">⚠ '+escapeHtml(w)+'</div>').join("")}
         </div>
@@ -492,6 +628,20 @@ function render(){
     }
     ordEl.appendChild(card);
   });
+
+  if(timeline.length){
+    const last=timeline[timeline.length-1];
+    const postShowCard=document.createElement("div");
+    postShowCard.className="card compere";
+    postShowCard.innerHTML=`
+      <span class="slot">—</span>
+      <div class="card-main">
+        <div class="card-title">Post-show announcements</div>
+        <div class="card-meta"><span class="time">${displayClock(last.endSec,s.showStartSec)}</span></div>
+      </div>
+      <span class="dur">${formatMMSS(last.nextStartSec-last.endSec)}</span>`;
+    ordEl.appendChild(postShowCard);
+  }
 
   const ivInput=ordEl.querySelector("[data-interval-min]");
   if(ivInput){
@@ -526,20 +676,26 @@ function wireDragHandles(){
       listEl.insertBefore(placeholder,card.nextSibling);
 
       function onMove(ev){
-        const others=Array.from(listEl.querySelectorAll(".card:not(.dragging)"));
+        const others=Array.from(listEl.querySelectorAll(".card:not(.dragging):not(.compere)"));
         let target=null;
         for(const c of others){
           const r=c.getBoundingClientRect();
           if(ev.clientY<r.top+r.height/2){target=c;break;}
         }
         if(target) listEl.insertBefore(placeholder,target);
-        else listEl.appendChild(placeholder);
+        else {
+          // nothing real below the pointer - drop at the end of the real cards,
+          // but still above the read-only Post-show card if one is present
+          const last=listEl.lastElementChild;
+          if(last && last.classList.contains("compere")) listEl.insertBefore(placeholder,last);
+          else listEl.appendChild(placeholder);
+        }
       }
       function onUp(){
         document.removeEventListener("pointermove",onMove);
         document.removeEventListener("pointerup",onUp);
         document.removeEventListener("pointercancel",onUp);
-        const siblings=Array.from(listEl.children).filter(c=>c!==card);
+        const siblings=Array.from(listEl.children).filter(c=>c!==card && !c.classList.contains("compere"));
         const newIndex=siblings.indexOf(placeholder);
         placeholder.remove();
         card.classList.remove("dragging");
@@ -556,31 +712,46 @@ function wireDragHandles(){
 
 /* ---------- export ---------- */
 function preparePrint(){
-  const timeline=computeTimeline(state.order);
+  const s=settings();
+  const timeline=computeTimeline(state.order,s);
   const showName=$("showName").value||"Running order";
   let rows=state.order.map((item,idx)=>{
     const t=timeline[idx];
-    if(item.kind==="interval") return `<tr><td colspan="2"><em>Interval</em></td><td></td><td>${formatClock(t.startSec)}</td><td>${formatMMSS(item.durationSec)}</td></tr>`;
+    if(item.kind==="interval") return `<tr><td colspan="2"><em>Interval</em></td><td></td><td>${displayClock(t.startSec,s.showStartSec)}</td><td>${formatMMSS(item.durationSec)}</td></tr>`;
     const seq=item.type==="Closing segment"?"":routineSequenceNumbers(state.order)[item.id];
-    return `<tr><td>${seq}</td><td>${escapeHtml(item.school)}</td><td>${escapeHtml(item.routine)}</td><td>${formatClock(t.startSec)}</td><td>${formatMMSS(item.durationSec)}</td></tr>`;
+    return `<tr><td>${seq}</td><td>${escapeHtml(item.school)}</td><td>${escapeHtml(item.routine)}</td><td>${displayClock(t.startSec,s.showStartSec)}</td><td>${formatMMSS(item.durationSec)}</td></tr>`;
   }).join("");
+  let welcomeRow="",postShowRow="";
+  if(timeline.length){
+    welcomeRow=`<tr><td colspan="2"><em>Welcome &amp; intro to act 1</em></td><td></td><td>${displayClock(0,s.showStartSec)}</td><td>${formatMMSS(timeline[0].startSec)}</td></tr>`;
+    const last=timeline[timeline.length-1];
+    postShowRow=`<tr><td colspan="2"><em>Post-show announcements</em></td><td></td><td>${displayClock(last.endSec,s.showStartSec)}</td><td>${formatMMSS(last.nextStartSec-last.endSec)}</td></tr>`;
+  }
   $("printTable").innerHTML=`<h2>${escapeHtml(showName)}</h2>
     <table><thead><tr><th>#</th><th>School</th><th>Routine</th><th>Start</th><th>Duration</th></tr></thead>
-    <tbody>${rows}</tbody></table>`;
+    <tbody>${welcomeRow}${rows}${postShowRow}</tbody></table>`;
 }
 
 function downloadCsv(){
-  const timeline=computeTimeline(state.order);
+  const s=settings();
+  const timeline=computeTimeline(state.order,s);
   const seq=routineSequenceNumbers(state.order);
   const lines=[["Slot","School","Routine","Type","Start","Duration"].join(",")];
+  if(timeline.length){
+    lines.push(["","","Welcome & intro to act 1","Compere",displayClock(0,s.showStartSec),formatMMSS(timeline[0].startSec)].map(csvCell).join(","));
+  }
   state.order.forEach((item,idx)=>{
     const t=timeline[idx];
     if(item.kind==="interval"){
-      lines.push(["","","Interval","Interval",formatClock(t.startSec),formatMMSS(item.durationSec)].map(csvCell).join(","));
+      lines.push(["","","Interval","Interval",displayClock(t.startSec,s.showStartSec),formatMMSS(item.durationSec)].map(csvCell).join(","));
     } else {
-      lines.push([item.type==="Closing segment"?"":seq[item.id],item.school,item.routine,item.type,formatClock(t.startSec),formatMMSS(item.durationSec)].map(csvCell).join(","));
+      lines.push([item.type==="Closing segment"?"":seq[item.id],item.school,item.routine,item.type,displayClock(t.startSec,s.showStartSec),formatMMSS(item.durationSec)].map(csvCell).join(","));
     }
   });
+  if(timeline.length){
+    const last=timeline[timeline.length-1];
+    lines.push(["","","Post-show announcements","Compere",displayClock(last.endSec,s.showStartSec),formatMMSS(last.nextStartSec-last.endSec)].map(csvCell).join(","));
+  }
   const blob=new Blob([lines.join("\n")],{type:"text/csv"});
   const a=document.createElement("a");
   a.href=URL.createObjectURL(blob);
@@ -599,17 +770,21 @@ Spotlight Stars\tMaya - solo\tSpotlight\t\t\t\t2:00\t0:30\tGet on / get off\t\tM
 Spotlight Stars\tMaya & Jess - duet\tSpotlight\t\tGoes right before the interval\t\t2:15\t\t\t\tMaya, Jess
 Element Dance Co\tSenior solo showcase\tSpotlight\t\tGoes right after the interval\t\t2:30\t\t\t\t
 Footlights Theatre School\tCrowd-pleaser tap number\tSpotlight\t\tExact position\t4\t2:45\t\t\t\t
-Whole cast\tFinale and curtain call\tClosing segment\t\t\t\t8:00\t4:00\tCompere\t1 min intro already included in duration\t`;
+Whole cast\tFinale and curtain call\tClosing segment\t\t\t\t8:00\t\t\t\t`;
 
 /* ---------- wiring ---------- */
 $("loadPasteBtn").onclick=()=>{
   const text=$("pasteArea").value;
   if(!text.trim()) return;
+  state.sheetUrl=null;
   loadRoutines(parseDelimited(text));
 };
+$("loadSheetBtn").onclick=()=>{ loadFromSheet($("sheetUrlInput").value); };
+$("refreshSheetBtn").onclick=()=>{ if(state.sheetUrl) loadFromSheet(state.sheetUrl); };
 $("loadSampleBtn").onclick=()=>{
   $("hasInterval").checked=true;
   $("pasteArea").value=SAMPLE;
+  state.sheetUrl=null;
   loadRoutines(parseDelimited(SAMPLE));
 };
 $("loadDifferentBtn").onclick=()=>{
@@ -625,9 +800,18 @@ $("intervalMin").onchange=()=>{
   if(idx!==-1){state.order[idx].durationSec=Math.max(1,parseInt($("intervalMin").value||"15",10))*60;render();}
 };
 $("minChangeMin").onchange=render;
-$("minRoutinesBetween").onchange=render;
+$("welcomeTime").onchange=render;
+$("actIntroTime").onchange=render;
+$("finaleIntroTime").onchange=render;
+$("postShowTime").onchange=render;
+$("showStartTime").onchange=render;
 $("printBtn").onclick=()=>{preparePrint();window.print();};
 $("csvBtn").onclick=downloadCsv;
+
+try{
+  const savedUrl=localStorage.getItem("sos_sheet_url");
+  if(savedUrl) $("sheetUrlInput").value=savedUrl;
+}catch(e){}
 
 render();
 </script>
