@@ -24,6 +24,7 @@ h1{font-family:'Oswald',sans-serif;letter-spacing:0.01em;font-size:30px;font-wei
 h3{margin:0;}
 .panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:18px;box-shadow:0 1px 2px rgba(40,30,10,0.04);}
 label{font-size:14px;color:var(--dim);display:block;margin-bottom:6px;font-weight:500;}
+.label-important{color:var(--gold);font-weight:600;}
 input,textarea{font-family:inherit;box-sizing:border-box;color:var(--text);}
 .field{
   width:100%;background:var(--panel-2);border:1px solid var(--border);
@@ -46,6 +47,15 @@ button:disabled{opacity:0.4;cursor:not-allowed;}
 .toggle input{width:18px;height:18px;accent-color:var(--gold-fill-hover);cursor:pointer;}
 .muted{color:var(--dim);font-size:14px;}
 .linklike{background:none;border:none;color:var(--gold);text-decoration:underline;cursor:pointer;font-family:inherit;font-weight:500;font-size:14px;letter-spacing:0;padding:0;min-height:auto;}
+.info-disclosure{margin-top:10px;}
+.info-disclosure summary{cursor:pointer;font-size:13.5px;color:var(--gold);font-weight:500;list-style:none;display:inline-flex;align-items:center;gap:6px;}
+.info-disclosure summary::-webkit-details-marker{display:none;}
+.info-disclosure summary::before{content:"ⓘ";font-size:14px;line-height:1;}
+.info-disclosure summary:hover{color:var(--gold-fill-hover);}
+.info-disclosure[open] summary{margin-bottom:8px;}
+.info-disclosure-body{font-size:13.5px;color:var(--dim);line-height:1.55;padding-left:20px;}
+.info-toggle{background:none;border:none;cursor:pointer;color:var(--dim);font-size:13px;padding:0;margin-left:5px;vertical-align:middle;}
+.info-toggle:hover{color:var(--gold);}
 .linklike:hover{background:none;color:var(--gold-fill-hover);}
 .totals{display:flex;gap:26px;align-items:baseline;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
 .totals .big{font-family:'Oswald',sans-serif;font-size:28px;color:var(--gold);font-weight:600;}
@@ -117,8 +127,9 @@ button:disabled{opacity:0.4;cursor:not-allowed;}
         <input class="field" type="number" id="intervalMin" value="15" min="1" max="60">
       </div>
       <div>
-        <label for="minChangeMin">Min. change time (min)</label>
+        <label for="minChangeMin" class="label-important">Costume change buffer (min)</label>
         <input class="field" type="number" id="minChangeMin" value="5" min="1" max="20">
+        <div class="muted" style="font-size:12px;margin-top:5px;">Min. time between two routines with the same dancer</div>
       </div>
     </div>
 
@@ -158,11 +169,14 @@ button:disabled{opacity:0.4;cursor:not-allowed;}
       </div>
     </div>
     <div class="muted" id="sheetStatus" style="margin-top:8px;"></div>
-    <div class="muted" style="margin-top:8px;line-height:1.5;">
-      In the Sheet: <strong>File → Share → Publish to web</strong> → choose the <strong>Routines</strong> tab and
-      <strong>Comma-separated values (.csv)</strong> → tick "Automatically republish when changes are made" → Publish.
-      Paste the link it gives you above. Anyone with that link can view the data (read-only).
-    </div>
+    <details class="info-disclosure">
+      <summary>How do I get this link?</summary>
+      <div class="info-disclosure-body">
+        In the Sheet: <strong>File → Share → Publish to web</strong> → choose the <strong>Routines</strong> tab and
+        <strong>Comma-separated values (.csv)</strong> → tick "Automatically republish when changes are made" → Publish.
+        Paste the link it gives you above. Anyone with that link can view the data (read-only).
+      </div>
+    </details>
 
     <div style="display:flex;align-items:center;gap:14px;margin:20px 0;">
       <div style="flex:1;height:1px;background:var(--border);"></div>
@@ -174,7 +188,6 @@ button:disabled{opacity:0.4;cursor:not-allowed;}
     <textarea class="field" id="pasteArea" placeholder="Copy the rows from your Google Sheet and paste here..."></textarea>
     <div class="actions">
       <button id="loadPasteBtn">Build running order</button>
-      <button class="ghost" id="loadSampleBtn">Try it with sample data</button>
     </div>
   </div>
 
@@ -760,18 +773,6 @@ function downloadCsv(){
 }
 function csvCell(v){v=String(v==null?"":v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
 
-/* ---------- sample data ---------- */
-const SAMPLE=`School\tRoutine\tType\tShares dancers with other Team routines?\tFixed position\tExact position (slot number)\tDuration (M:SS)\tGap after\tGap after - type\tNotes\tPerformer(s) (optional)
-Sparkle Dance Academy\tBig group opener\tTeam\tYes\tOpens the show\t\t3:45\t\t\t\t
-Sparkle Dance Academy\tFinale group number\tTeam\tYes\t\t\t3:20\t0:30\tGet on / get off\t\t
-Element Dance Co\tJunior team\tTeam\tNo\t\t\t3:00\t\t\tTwo separate teams, no shared dancers\t
-Element Dance Co\tSenior team\tTeam\tNo\t\t\t3:10\t\t\t\t
-Spotlight Stars\tMaya - solo\tSpotlight\t\t\t\t2:00\t0:30\tGet on / get off\t\tMaya
-Spotlight Stars\tMaya & Jess - duet\tSpotlight\t\tGoes right before the interval\t\t2:15\t\t\t\tMaya, Jess
-Element Dance Co\tSenior solo showcase\tSpotlight\t\tGoes right after the interval\t\t2:30\t\t\t\t
-Footlights Theatre School\tCrowd-pleaser tap number\tSpotlight\t\tExact position\t4\t2:45\t\t\t\t
-Whole cast\tFinale and curtain call\tClosing segment\t\t\t\t8:00\t\t\t\t`;
-
 /* ---------- wiring ---------- */
 $("loadPasteBtn").onclick=()=>{
   const text=$("pasteArea").value;
@@ -781,12 +782,6 @@ $("loadPasteBtn").onclick=()=>{
 };
 $("loadSheetBtn").onclick=()=>{ loadFromSheet($("sheetUrlInput").value); };
 $("refreshSheetBtn").onclick=()=>{ if(state.sheetUrl) loadFromSheet(state.sheetUrl); };
-$("loadSampleBtn").onclick=()=>{
-  $("hasInterval").checked=true;
-  $("pasteArea").value=SAMPLE;
-  state.sheetUrl=null;
-  loadRoutines(parseDelimited(SAMPLE));
-};
 $("loadDifferentBtn").onclick=()=>{
   $("dataPanel").style.display="block";
   $("dataSummary").style.display="none";
