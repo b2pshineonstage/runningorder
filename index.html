@@ -262,7 +262,7 @@ function displayClock(elapsedSec,showStartSec){
   return formatClock(elapsedSec);
 }
 
-const COLS=["school","routine","type","sharesYesNo","fixedPosition","exactSlot","durationRaw","gapAfterRaw","gapType","notes","performers"];
+const COLS=["school","routine","type","durationRaw","sharesYesNo","fixedPosition","exactSlot","gapAfterRaw","performers"];
 function rowsToRoutines(rows){
   let r=rows;
   if(r.length && String(r[0][0]||"").trim().toLowerCase()==="school") r=r.slice(1);
