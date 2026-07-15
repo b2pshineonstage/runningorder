@@ -79,9 +79,11 @@ button:disabled{opacity:0.4;cursor:not-allowed;}
 .pill{font-size:11px;text-transform:uppercase;letter-spacing:0.04em;padding:3px 9px;border-radius:20px;border:1px solid var(--border);color:var(--dim);font-weight:600;}
 .pill.team{border-color:var(--gold);color:var(--gold);background:var(--gold-wash);}
 .pill.spotlight{border-color:var(--spot);color:var(--spot);background:var(--spot-wash);}
+.pill.mic{border-color:#7b5ea7;color:#7b5ea7;background:#f0ecf8;}
 .time{font-size:13px;color:var(--dim);font-family:ui-monospace,monospace;white-space:nowrap;}
 .dur{font-size:14.5px;color:var(--text);font-family:ui-monospace,monospace;white-space:nowrap;font-weight:500;}
 .warn-line{font-size:13.5px;color:var(--warn);margin-top:6px;line-height:1.4;}
+.warn-line.mic{color:#7b5ea7;}
 .interval-input{width:62px;flex:0 0 auto;background:var(--panel);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:8px 6px;font-size:14.5px;text-align:center;}
 .drop-placeholder{height:4px;background:var(--gold-fill);border-radius:3px;margin:3px 0;}
 .empty{padding:40px 16px;text-align:center;color:var(--dim);font-size:15px;}
@@ -151,6 +153,16 @@ button:disabled{opacity:0.4;cursor:not-allowed;}
         <div>
           <label for="postShowTime">Post-show announcements</label>
           <input class="field" type="text" id="postShowTime" value="6:00" placeholder="M:SS">
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border);">
+      <label style="margin-bottom:10px;">Microphones <span class="muted" style="font-weight:400;">- for routines where specific performers need lapel mics</span></label>
+      <div class="row">
+        <div style="flex:0 0 auto;min-width:200px;">
+          <label for="venuesMics">Mics available at this venue</label>
+          <input class="field" type="number" id="venueMics" value="6" min="1" max="30">
         </div>
       </div>
     </div>
@@ -262,7 +274,7 @@ function displayClock(elapsedSec,showStartSec){
   return formatClock(elapsedSec);
 }
 
-const COLS=["school","routine","type","durationRaw","sharesYesNo","fixedPosition","exactSlot","gapAfterRaw","performers"];
+const COLS=["school","routine","type","durationRaw","sharesYesNo","fixedPosition","exactSlot","gapAfterRaw","performers","micPerformers","micCount"];
 function rowsToRoutines(rows){
   let r=rows;
   if(r.length && String(r[0][0]||"").trim().toLowerCase()==="school") r=r.slice(1);
@@ -305,6 +317,48 @@ function sharesPerformers(a,b){
   if(a.type==="Spotlight"&&b.type==="Spotlight") return performersOverlap(a,b);
   if(a.type==="Team"&&b.type==="Team") return a.sharesYesNo!=="No";
   return true;
+}
+
+/* ---------- mic logic ---------- */
+function parseMicPerformers(str){
+  if(!str) return [];
+  return str.split(/,|&/).map(s=>s.trim().toLowerCase()).filter(Boolean);
+}
+function parseMicCount(str){
+  const n=parseInt(str,10);
+  return isNaN(n)?0:n;
+}
+// Returns true if two routines compete for the same physical mics
+// with different performers - meaning a mic change is needed between them
+function needsMicChange(a,b,venueMics){
+  const ma=parseMicPerformers(a.micPerformers);
+  const mb=parseMicPerformers(b.micPerformers);
+  if(!ma.length||!mb.length) return false;
+  // Same performers in both routines - no change needed
+  const samePerformers=ma.length===mb.length&&ma.every(n=>mb.includes(n));
+  if(samePerformers) return false;
+  // Different performers - a mic change is always needed
+  // (even if there are enough mics for both sets, the kids still need
+  //  to swap mics between routines)
+  return true;
+}
+// For auto-arrange: should these two routines be in different halves?
+function preferDifferentHalves(a,b,venueMics){
+  if(!needsMicChange(a,b,venueMics)) return false;
+  // Different schools sharing mics - definitely different halves
+  if(a.school!==b.school) return true;
+  // Same school, different mic performers - prefer interval separation
+  return true;
+}
+// Get all schools that have mic routines
+function getMicSchools(routines){
+  const schools={};
+  routines.forEach(r=>{
+    if(parseMicPerformers(r.micPerformers).length>0){
+      (schools[r.school]=schools[r.school]||[]).push(r);
+    }
+  });
+  return schools;
 }
 
 /* ---------- timeline / warnings ---------- */
@@ -396,6 +450,31 @@ function computeWarnings(order,settings){
     if(r.fixedPosition==="Goes right after the interval" && (intervalIdx===-1||idx!==intervalIdx+1)) add(r.id,"Flagged to go right after the interval, but isn't adjacent to it");
   });
 
+  // mic-change warnings
+  const venueMics=settings.venueMics||6;
+  for(let i=0;i<routines.length;i++){
+    for(let j=i+1;j<routines.length;j++){
+      const a=routines[i],b=routines[j];
+      if(!needsMicChange(a,b,venueMics)) continue;
+      const idxA=order.indexOf(a),idxB=order.indexOf(b);
+      const lo=Math.min(idxA,idxB),hi=Math.max(idxA,idxB);
+      const hasIntervalBetween=intervalIdx>lo&&intervalIdx<hi;
+      const [earlier,later]=idxA<idxB?[a,b]:[b,a];
+
+      if(preferDifferentHalves(a,b,venueMics)&&!hasIntervalBetween){
+        // Both mic routines in same half - warn on the later one
+        const between=order.slice(lo+1,hi).filter(o=>o.kind!=="interval").length;
+        add(later.id,`🎤 Mic change needed after "${earlier.routine}" — ideally these should be in different halves (interval between them)`);
+      } else if(!hasIntervalBetween){
+        // Same half is acceptable but flag if very close together
+        const between=order.slice(lo+1,hi).filter(o=>o.kind!=="interval").length;
+        if(between<3){
+          add(later.id,`🎤 Mic change needed after "${earlier.routine}" — only ${between} routine${between===1?"":"s"} between them, push further apart if possible`);
+        }
+      }
+    }
+  }
+
   return {warnings,timeline,seqNum};
 }
 function violationPenalty(order,settings){
@@ -417,6 +496,36 @@ function autoArrange(routines,settings){
     i++;
   }
   active=interleaved;
+
+  // mic pre-sort: if two schools share mics, assign one school's mic routines
+  // to Act 1 and the other's to Act 2 by tagging them as soft half-anchors.
+  // We do this by sorting mic routines to the front/back of the active array
+  // before handing off to the local search, so the solver starts from a
+  // sensible position rather than having to discover it through random swaps.
+  if(settings.hasInterval){
+    const venueMics=settings.venueMics||6;
+    const micSchools=getMicSchools(active);
+    const micSchoolKeys=Object.keys(micSchools);
+    if(micSchoolKeys.length===1){
+      // One school with mic routines: spread their routines across the midpoint
+      const schoolRoutines=micSchools[micSchoolKeys[0]];
+      if(schoolRoutines.length>=2){
+        const mid=Math.floor(active.length/2);
+        const half1=schoolRoutines[0],half2=schoolRoutines[1];
+        const i1=active.indexOf(half1),i2=active.indexOf(half2);
+        // Put first mic routine before midpoint, second after
+        if(i1>mid){active.splice(i1,1);active.unshift(half1);}
+        if(i2<mid){active.splice(active.indexOf(half2),1);active.push(half2);}
+      }
+    } else if(micSchoolKeys.length>=2){
+      // Two schools sharing mics: school A routines early, school B routines late
+      const schoolA=micSchoolKeys[0],schoolB=micSchoolKeys[1];
+      const aRoutines=micSchools[schoolA],bRoutines=micSchools[schoolB];
+      aRoutines.forEach(r=>{const idx=active.indexOf(r);if(idx>-1){active.splice(idx,1);active.unshift(r);}});
+      bRoutines.forEach(r=>{const idx=active.indexOf(r);if(idx>-1){active.splice(idx,1);active.push(r);}});
+    }
+  }
+
   const openItem=active.find(r=>r.fixedPosition==="Opens the show");
   const closeItem=active.find(r=>r.fixedPosition==="Closes the show");
   active=active.filter(r=>r!==openItem&&r!==closeItem);
@@ -484,6 +593,7 @@ function settings(){
     finaleIntroSec:parseDuration($("finaleIntroTime").value)??30,
     postShowSec:parseDuration($("postShowTime").value)??360,
     showStartSec:parseClockTimeToSec($("showStartTime").value),
+    venueMics:Math.max(1,parseInt($("venueMics").value||"6",10)),
   };
 }
 
@@ -633,9 +743,10 @@ function render(){
             <span class="pill ${item.type==="Team"?"team":(item.type==="Spotlight"?"spotlight":"")}">${escapeHtml(item.type||"?")}</span>
             <span class="muted">${escapeHtml(item.school)}</span>
             ${item.performers?`<span class="muted">· ${escapeHtml(item.performers)}</span>`:""}
+            ${item.micPerformers?`<span class="pill mic">🎤 ${escapeHtml(item.micPerformers)}</span>`:""}
             <span class="time">${displayClock(t.startSec,s.showStartSec)}</span>
           </div>
-          ${warnArr.map(w=>'<div class="warn-line">⚠ '+escapeHtml(w)+'</div>').join("")}
+          ${warnArr.map(w=>w.startsWith("🎤")?'<div class="warn-line mic">'+escapeHtml(w)+'</div>':'<div class="warn-line">⚠ '+escapeHtml(w)+'</div>').join("")}
         </div>
         <span class="dur">${formatMMSS(item.durationSec)}</span>`;
     }
@@ -800,6 +911,7 @@ $("actIntroTime").onchange=render;
 $("finaleIntroTime").onchange=render;
 $("postShowTime").onchange=render;
 $("showStartTime").onchange=render;
+$("venueMics").onchange=render;
 $("printBtn").onclick=()=>{preparePrint();window.print();};
 $("csvBtn").onclick=downloadCsv;
 
