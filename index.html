@@ -274,7 +274,7 @@ function displayClock(elapsedSec,showStartSec){
   return formatClock(elapsedSec);
 }
 
-const COLS=["school","routine","type","durationRaw","sharesYesNo","fixedPosition","exactSlot","gapAfterRaw","performers","micPerformers","micCount"];
+const COLS=["school","routine","type","durationRaw","sharesYesNo","fixedPosition","dancerGroup","exactSlot","gapAfterRaw","performers","micPerformers","micCount"];
 function rowsToRoutines(rows){
   let r=rows;
   const hIdx=r.slice(0,5).findIndex(row=>String(row[0]||"").trim().toLowerCase()==="school");
@@ -316,7 +316,14 @@ function sharesPerformers(a,b){
   if(a.school!==b.school) return false;
   if(a.type==="Closing segment"||b.type==="Closing segment") return false;
   if(a.type==="Spotlight"&&b.type==="Spotlight") return performersOverlap(a,b);
-  if(a.type==="Team"&&b.type==="Team") return a.sharesYesNo!=="No";
+    if(a.type==="Team"&&b.type==="Team"){
+    if(a.dancerGroup&&b.dancerGroup){
+      const ag=a.dancerGroup.split("").map(s=>s.trim().toUpperCase()).filter(Boolean);
+      const bg=b.dancerGroup.split("").map(s=>s.trim().toUpperCase()).filter(Boolean);
+      return ag.some(g=>bg.includes(g));
+    }
+    return a.sharesYesNo!=="No";
+  }
   return true;
 }
 
