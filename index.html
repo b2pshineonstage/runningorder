@@ -277,9 +277,10 @@ function displayClock(elapsedSec,showStartSec){
 const COLS=["school","routine","type","durationRaw","sharesYesNo","fixedPosition","exactSlot","gapAfterRaw","performers","micPerformers","micCount"];
 function rowsToRoutines(rows){
   let r=rows;
-  if(r.length && String(r[0][0]||"").trim().toLowerCase()==="school") r=r.slice(1);
+  const hIdx=r.slice(0,5).findIndex(row=>String(row[0]||"").trim().toLowerCase()==="school");
+  if(hIdx>=0) r=r.slice(hIdx+1);
   const issues=[];
-  const routines=r.filter(row=>row.some(c=>c!=="")).map((row,idx)=>{
+  const routines=r.filter(row=>(row[1]||"").trim()!=="").map((row,idx)=>{
     const obj={id:"r"+idx+"_"+Math.random().toString(36).slice(2,7)};
     COLS.forEach((key,i)=>obj[key]=(row[i]||"").trim());
     obj.durationSec=parseDuration(obj.durationRaw);
